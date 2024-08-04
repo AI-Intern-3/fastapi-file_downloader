@@ -102,4 +102,5 @@ async def get_recordings(request: Request):
     recordings = get_recordings("YOUR_MEETING_ID", access_token)  # Replace with actual meeting ID
 
     # Render template with recordings data (adjust template as needed)
-    return templates.TemplateResponse("recordings.html", {"
+    return templates.TemplateResponse("recordings.html", {"data": recordings})
+
