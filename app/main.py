@@ -17,7 +17,7 @@ settings = Settings()
 
 @app.get("/")
 def read_root():
-    return templates.TemplateResponse("index.html", {"request": Request})
+    return templates.TemplateResponse("/app/templates/index.html", {"request": Request})
 
 @app.post("/configure")
 async def configure(zoom_api_key: str = Form(...), zoom_api_secret: str = Form(...), zoom_jwt_token: str = Form(...)):
