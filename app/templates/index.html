@@ -1,14 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Stylish File Downloader</title>
+  <title>Zoom File Downloader</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <form action="/download" method="post">
-    <label for="link">Paste Link:</label>
-    <input type="text" id="link" name="link" required>
-    <button type="submit">Download</button>
-  </form>
+  <div class="tab">
+    <button class="tablinks" onclick="openTab(event, 'downloadFile')">Download File</button>
+    <button class="tablinks" onclick="openTab(event, 'zoomConfig')">Zoom Configuration</button>
+    <button class="tablinks" onclick="openTab(event, 'recordings')">Recordings</button>
+  </div>
+
+  <div id="downloadFile" class="tabcontent">
+    <form action="/download" method="post">
+      <label for="link">Paste Link:</label>
+      <input type="text" id="link" name="link" required>
+      <button type="submit">Download</button>
+    </form>
+  </div>
+
+  <div id="zoomConfig" class="tabcontent">
+    <form>
+      <label for="apiKey">Zoom API Key:</label>
+      <input type="text" id="apiKey" name="apiKey">
+      <label for="apiSecret">Zoom API Secret:</label>
+      <input type="text" id="apiSecret" name="apiSecret">
+      <button type="submit">Save Configuration</button>
+    </form>
+  </div>
+
+  <div id="recordings" class="tabcontent">
+    </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
