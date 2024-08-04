@@ -1,106 +1,42 @@
-from fastapi import FastAPI, Request, Form, File, UploadFile, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, Request, Form
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-import requests
-import json
+from pydantic import BaseSettings
+import os
 
 app = FastAPI()
-templates = Jinja2Templates(directory="app/templates/")
 
-# Zoom API Credentials (Replace with yours)
-ZOOM_API_KEY = "YOUR_ZOOM_API_KEY"
-ZOOM_API_SECRET = "YOUR_ZOOM_API_SECRET"
-ZOOM_API_BASE_URL = "https://api.zoom.us/v2"
+templates = Jinja2Templates(directory="templates")
 
-# Function to get an access token using JWT (replace with your implementation)
-def get_access_token():
-    # Implement logic to obtain an access token using JWT
-    # Refer to Zoom API documentation for details on creating a JWT app:
-    # https://marketplace.zoom.us/docs/guides/jwt/tutorial
-    # This function should return a valid access token as a string
-    pass
+class Settings(BaseSettings):
+    zoom_api_key: str
+    zoom_api_secret: str
+    zoom_jwt_token: str
 
-
-# Function to download a file
-def download_file(url, filename):
-    response = requests.get(url, stream=True)
-    response.raise_for_status()
-
-    with open(filename, 'wb') as f:
-        for chunk in response.iter_content(chunk_size=8192):
-            if chunk:
-                f.write(chunk)
-
-    return filename
-
-
-# Function to retrieve a list of recordings for a meeting
-def get_recordings(meeting_id, access_token):
-    url = f"{ZOOM_API_BASE_URL}/meetings/{meeting_id}/recordings"
-    headers = {"Authorization": f"Bearer {access_token}"}
-
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        data = json.loads(response.text)
-        recordings = data.get("recordings", [])
-        return recordings
-    else:
-        raise Exception(f"Error fetching recordings: {response.text}")
-
+settings = Settings()
 
 @app.get("/")
-async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+def read_root():
+    return templates.TemplateResponse("index.html", {"request": Request})
 
-
-@app.post("/download")
-async def download_file(link: str = Form(...)):
-    try:
-        # Logic for handling non-Zoom download links can be added here
-        if not link.startswith("https://zoom.us/rec"):
-            raise Exception("Currently only Zoom recording download links are supported")
-        # ... (extract meeting ID from link)
-
-        # Retrieve access token (replace with your get_access_token function)
-        access_token = get_access_token()
-
-        # Fetch recordings using meeting ID and access token
-        recordings = get_recordings(meeting_id, access_token)
-
-        # Find the recording matching the link (if provided)
-        download_url = None
-        for recording in recordings:
-            if recording["recording_file"] == link.split("/")[-1]:
-                download_url = recording["download_url"]
-                break
-
-        if download_url:
-            filename = download_url.split("/")[-1]
-            return FileResponse(download_file(download_url, filename), media_type='video/mp4', filename=filename)
-        else:
-            raise Exception("Recording not found")
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/save_config")
-async def save_config(api_key: str = Form(...), api_secret: str = Form(...)):
-    global ZOOM_API_KEY, ZOOM_API_SECRET
-    ZOOM_API_KEY = api_key
-    ZOOM_API_SECRET = api_secret
-    # Implement logic to store configuration securely (e.g., database)
-    return {"message": "Configuration saved successfully"}
-
+@app.post("/configure")
+async def configure(zoom_api_key: str = Form(...), zoom_api_secret: str = Form(...), zoom_jwt_token: str = Form(...)):
+    settings.zoom_api_key = zoom_api_key
+    settings.zoom_api_secret = zoom_api_secret
+    settings.zoom_jwt_token = zoom_jwt_token
+    os.environ["ZOOM_API_KEY"] = zoom_api_key
+    os.environ["ZOOM_API_SECRET"] = zoom_api_secret
+    os.environ["ZOOM_JWT_TOKEN"] = zoom_jwt_token
+    return {"message": "Configured successfully"}
 
 @app.get("/recordings")
-async def get_recordings(request: Request):
-    # Retrieve access token (replace with your get_access_token function)
-    access_token = get_access_token()
+async def get_recordings():
+    # Implement logic to fetch recordings from Zoom API using the stored tokens
+    recordings = [...]  # Replace with actual implementation
+    return templates.TemplateResponse("recordings.html", {"request": Request, "recordings": recordings})
 
-    # Fetch all recordings (change based on your needs)
-    recordings = get_recordings("YOUR_MEETING_ID", access_token)  # Replace with actual meeting ID
-
-    # Render template with recordings data (adjust template as needed)
-    return templates.TemplateResponse("recordings.html", {"data": recordings})
-
+@app.get("/download/{recording_id}")
+async def download_recording(recording_id: str):
+    # Implement logic to download recording from Zoom API using the stored tokens
+    # Replace with actual implementation
+    return {"message": "Download successful"}
