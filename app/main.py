@@ -6,7 +6,7 @@ from fastapi.templating import Jinja2Templates
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates/")
 
-@app.get("/")
+@app.get("/app/")
 async def index(request: Request):
     return templates.get_template("index.html").render({"request": request})
 
