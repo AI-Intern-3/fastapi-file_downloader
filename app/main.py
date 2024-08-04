@@ -8,7 +8,7 @@ templates = Jinja2Templates(directory="app/templates/")
 
 @app.get("/")
 async def index(request: Request):
-    return templates.get_template("app/templates/index.html").render({"request": request})
+    return templates.get_template("index.html").render({"request": request})
 
 @app.post("/download")
 async def download_file(link: str = Form(...)):
