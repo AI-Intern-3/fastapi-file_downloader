@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Zoom Recordings</title>
+</head>
+<body>
+    <h1>Zoom Recordings</h1>
+    <ul>
+    {% for recording in recordings %}
+        <li>
+            <a href="/download/{{ recording.id }}">{{ recording.title }}</a>
+        </li>
+    {% endfor %}
+    </ul>
+</body>
+</html>
